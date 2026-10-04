@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="void">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Alex Chen // VEX PROTOCOL — Experimental CSS 3D Spatial Playground & Product Interaction Design Portfolio.">
+  <meta name="theme-color" content="#07070a">
+  <title>ALEX CHEN // VEX PROTOCOL [SPATIAL INTERACTION ARCHITECT]</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ambient 3D Grid & CRT Scanline Overlay -->
+  <div class="spatial-bg-grid" aria-hidden="true"></div>
+  <div class="scanline-overlay" aria-hidden="true"></div>
+
+  <!-- Dual-Reticle Custom Cursor (Vanilla JS Tracked) -->
+  <div id="custom-cursor" aria-hidden="true"></div>
+  <div id="custom-cursor-follower" aria-hidden="true">
+    <span id="cursor-label">[HOVER]</span>
+  </div>
+
+  <!-- SPATIAL HUD OVERLAY -->
+  <header class="spatial-hud" role="banner">
+    <!-- Top HUD Bar -->
+    <div class="hud-top">
+      <div class="hud-brand" data-cursor="[RESET_CAM]">
+        <div class="hud-logo-mark" id="brand-logo">VX</div>
+        <div class="hud-brand-details">
+          <span class="hud-brand-name">Alex Chen</span>
+          <span class="hud-brand-role">Spatial Interaction Architect // v4.2</span>
+        </div>
+      </div>
+
+      <div class="hud-status-badge" aria-live="polite">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <span id="system-status-text">CORE: ONLINE // 60 FPS</span>
+      </div>
+
+      <div class="hud-controls-group">
+        <!-- Audio Synth Toggle (Off by default per spec) -->
+        <button type="button" class="hud-btn" id="audio-toggle-btn" aria-label="Toggle Synthesizer Sound Effects" data-cursor="[TOGGLE_AUDIO]">
+          <span id="audio-icon">🔇</span>
+          <span id="audio-label">AUDIO: OFF</span>
+          <span class="hud-btn-key">M</span>
+        </button>
+
+        <!-- Dimension Switch (Void <-> Solar) -->
+        <button type="button" class="hud-btn" id="dimension-toggle-btn" aria-label="Toggle Alternate Dimension Mode" data-cursor="[SHIFT_DIMENSION]">
+          <span id="dimension-icon">⚡</span>
+          <span id="dimension-label">VOID MODE</span>
+          <span class="hud-btn-key">D</span>
+        </button>
+
+        <!-- Zero-G Float Toggle -->
+        <button type="button" class="hud-btn" id="zerog-toggle-btn" aria-label="Toggle Zero-Gravity Drift" data-cursor="[ZERO_G]">
+          <span>🪐</span>
+          <span id="zerog-label">GRAVITY: 1.0G</span>
+          <span class="hud-btn-key">G</span>
+        </button>
+
+        <!-- Help Shortcuts Trigger -->
+        <button type="button" class="hud-btn" id="shortcuts-toggle-btn" aria-label="Keyboard Shortcuts" data-cursor="[HELP]">
+          <span>?</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom HUD Bar -->
+    <div class="hud-bottom">
+      <div class="hud-telemetry" aria-label="Spatial Coordinates">
+        <div class="telemetry-item">STAGE: <span id="telemetry-section">01. VOID</span></div>
+        <div class="telemetry-item">CURSOR: <span id="telemetry-cursor">X: 000 | Y: 000</span></div>
+        <div class="telemetry-item">PERSPECTIVE: <span id="telemetry-angles">P: 0.0° | Y: 0.0°</span></div>
+      </div>
+
+      <div class="hud-hints">
+        <span>NAV:</span>
+        <kbd>1-5</kbd> SECTIONS
+        <kbd>DRAG</kbd> ORBIT
+        <kbd>G</kbd> ZERO-G
+        <kbd>M</kbd> AUDIO
+      </div>
+    </div>
+  </header>
+
+  <!-- RIGHT ORBITAL WAYPOINT NAVIGATION DOCK -->
+  <nav class="hud-orbital-nav" aria-label="Spatial Waypoints Navigation">
+    <button type="button" class="nav-node-btn active" data-target="section-hero" data-cursor="[WARP_01]">
+      <span class="nav-node-ring"><span class="nav-node-dot"></span></span>
+      <span class="nav-node-label">01 // VOID</span>
+    </button>
+    <button type="button" class="nav-node-btn" data-target="section-about" data-cursor="[WARP_02]">
+      <span class="nav-node-ring"><span class="nav-node-dot"></span></span>
+      <span class="nav-node-label">02 // PROTOCOL</span>
+    </button>
+    <button type="button" class="nav-node-btn" data-target="section-projects" data-cursor="[WARP_03]">
+      <span class="nav-node-ring"><span class="nav-node-dot"></span></span>
+      <span class="nav-node-label">03 // ARTIFACTS</span>
+    </button>
+    <button type="button" class="nav-node-btn" data-target="section-skills" data-cursor="[WARP_04]">
+      <span class="nav-node-ring"><span class="nav-node-dot"></span></span>
+      <span class="nav-node-label">04 // MATRIX</span>
+    </button>
+    <button type="button" class="nav-node-btn" data-target="section-contact" data-cursor="[WARP_05]">
+      <span class="nav-node-ring"><span class="nav-node-dot"></span></span>
+      <span class="nav-node-label">05 // DISPATCH</span>
+    </button>
+  </nav>
+
+  <!-- MOBILE THUMB-DOCK -->
+  <nav class="mobile-thumb-dock" aria-label="Mobile Navigation">
+    <button type="button" class="mobile-dock-btn active" data-target="section-hero">01 HERO</button>
+    <button type="button" class="mobile-dock-btn" data-target="section-about">02 ABOUT</button>
+    <button type="button" class="mobile-dock-btn" data-target="section-projects">03 WORK</button>
+    <button type="button" class="mobile-dock-btn" data-target="section-skills">04 SKILLS</button>
+    <button type="button" class="mobile-dock-btn" data-target="section-contact">05 CONTACT</button>
+  </nav>
+
+  <!-- MAIN 3D SPATIAL VIEWPORT -->
+  <main class="spatial-viewport" id="viewport-stage">
+    <div class="spatial-stage" id="spatial-world-stage">
+
+      <!-- ====================================================================
+           01. HERO SECTION // SPATIAL VOID & INTERACTIVE HYPERCUBE
+           ==================================================================== -->
+      <section class="spatial-section active" id="section-hero" aria-labelledby="hero-title">
+        <div class="section-container">
+          <div class="hero-content-grid">
+
+            <!-- Hero Typography Deck -->
+            <div class="hero-text-deck">
+              <div class="hero-status-pill">
+                <span class="pulse-dot" aria-hidden="true"></span>
+                <span>SPATIAL INTERACTION LAB // OPEN FOR SELECT CONTRACTS</span>
+              </div>
+
+              <h1 class="hero-main-title" id="hero-title">
+                PHYSICS IN <br>
+                <span class="glitch-text" data-text="PIXELS">PIXELS.</span><br>
+                WEIGHT IN CODE.
+              </h1>
+
+              <p class="hero-tagline">
+                I design and engineer <strong>multi-dimensional user interfaces</strong>, spatial design systems, and tactile digital software that humans can intuitively feel.
+              </p>
+
+              <div class="hero-actions-row">
+                <button type="button" class="cta-primary" id="hero-cta-projects" data-target="section-projects" data-cursor="[WARP_ARTIFACTS]">
+                  <span>Explore Artifacts</span>
+                  <span aria-hidden="true">→</span>
+                </button>
+                <button type="button" class="cta-secondary" id="hero-cta-contact" data-target="section-contact" data-cursor="[WARP_DISPATCH]">
+                  <span>Initiate Transmission</span>
+                  <span aria-hidden="true">⚡</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 3D Interactive CSS Hypercube (Tesseract) -->
+            <div class="hero-cube-stage" aria-label="Interactive 3D Hypercube">
+              <div class="hypercube-wrapper" id="hypercube-interactive" data-cursor="[CLICK_EXPLODE]">
+                <div class="hypercube" id="hypercube-mesh">
+                  <div class="cube-singularity" aria-hidden="true"></div>
+                  <!-- 6 Pure CSS 3D Transformed Faces -->
+                  <div class="cube-face face-front">
+                    <div class="face-header"><span>NODE_01</span><span>[Z+110]</span></div>
+                    <div class="face-reticle"></div>
+                    <div class="face-footer"><span>VEX_SYS</span><span>PRES_3D</span></div>
+                  </div>
+                  <div class="cube-face face-back">
+                    <div class="face-header"><span>NODE_02</span><span>[Z-110]</span></div>
+                    <div class="face-reticle"></div>
+                    <div class="face-footer"><span>VEX_SYS</span><span>ROT_Y180</span></div>
+                  </div>
+                  <div class="cube-face face-right">
+                    <div class="face-header"><span>NODE_03</span><span>[X+110]</span></div>
+                    <div class="face-reticle"></div>
+                    <div class="face-footer"><span>VEX_SYS</span><span>ROT_Y90</span></div>
+                  </div>
+                  <div class="cube-face face-left">
+                    <div class="face-header"><span>NODE_04</span><span>[X-110]</span></div>
+                    <div class="face-reticle"></div>
+                    <div class="face-footer"><span>VEX_SYS</span><span>ROT_Y-90</span></div>
+                  </div>
+                  <div class="cube-face face-top">
+                    <div class="face-header"><span>NODE_05</span><span>[Y+110]</span></div>
+                    <div class="face-reticle"></div>
+                    <div class="face-footer"><span>VEX_SYS</span><span>ROT_X90</span></div>
+                  </div>
+                  <div class="cube-face face-bottom">
+                    <div class="face-header"><span>NODE_06</span><span>[Y-110]</span></div>
+                    <div class="face-reticle"></div>
+                    <div class="face-footer"><span>VEX_SYS</span><span>ROT_X-90</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="cube-instruction-tag">
+                CLICK CUBE TO <span>[EXPLODE / ASSEMBLE]</span> // DRAG TO ROTATE
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           02. ABOUT SECTION // PHILOSOPHY & TACTILE MICRO-LAB
+           ==================================================================== -->
+      <section class="spatial-section" id="section-about" aria-labelledby="about-title">
+        <div class="section-container">
+          <div class="section-header-block">
+            <div class="section-kicker">02 // DESIGN MANIFESTO</div>
+            <h2 class="section-title" id="about-title">TACTILE FRICTION IN A WEIGHTLESS WEB</h2>
+            <p class="section-subtitle">Why flat, lifeless rectangles bore us — and how tactile physics bridge the human sensory gap.</p>
+          </div>
+
+          <div class="about-grid-layout">
+            <!-- Manifesto Card -->
+            <article class="about-manifesto-card">
+              <blockquote class="manifesto-quote">
+                "When every interface is frictionless, everything feels disposable. Real digital craft gives software virtual mass, tactile resistance, and mechanical delight."
+              </blockquote>
+              <p class="manifesto-body">
+                I'm <strong>Alex Chen</strong>, a Principal Interaction Designer and Creative Technologist. For over 8 years, I've lived at the intersection of spatial computing, design systems, and front-end engineering. I don't just mock up pretty Figma frames — I code living design prototypes that bend physics, respond to biological ergonomics, and scale across billions of design tokens.
+              </p>
+              <p class="manifesto-body">
+                Previously leading spatial design architecture at <em>MetaSpatial Labs</em> and authoring the <em>Synapse Token Protocol</em>, I specialize in zero-latency micro-interactions, automotive heads-up telemetry, and multi-dimensional operating surfaces.
+              </p>
+
+              <div class="manifesto-stats-row">
+                <div class="stat-block">
+                  <div class="stat-block-num">08+</div>
+                  <div class="stat-block-lbl">Years Crafting</div>
+                </div>
+                <div class="stat-block">
+                  <div class="stat-block-num">240K</div>
+                  <div class="stat-block-lbl">Engineers on Systems</div>
+                </div>
+                <div class="stat-block">
+                  <div class="stat-block-num">14</div>
+                  <div class="stat-block-lbl">Design Honors & Patents</div>
+                </div>
+              </div>
+            </article>
+
+            <!-- Interactive Micro-Interaction Sandbox -->
+            <div class="tactile-lab-wrapper">
+              <div class="lab-header-bar">
+                <span>[INTERACTION_SANDBOX // LIVE TOKENS]</span>
+                <span id="lab-active-mode">TESTING: REALTIME</span>
+              </div>
+
+              <div class="lab-widgets-grid">
+                <!-- Widget 1: Magnetic Elastic Spring Trigger -->
+                <div class="lab-widget-card" data-cursor="[PULL_SPRING]">
+                  <div class="widget-title-row">
+                    <span>01 // MAGNETIC SPRING</span>
+                    <span>LERP_STIFFNESS: 0.28</span>
+                  </div>
+                  <div class="spring-btn-container">
+                    <button type="button" class="magnetic-spring-btn" id="lab-spring-btn">
+                      PRESS & PULL ME
+                    </button>
+                  </div>
+                  <div class="face-footer">
+                    <span>TENSION: <span id="spring-tension-val">0.00</span></span>
+                    <span>CSS_TRANSFORM</span>
+                  </div>
+                </div>
+
+                <!-- Widget 2: Dynamic Token Shifter -->
+                <div class="lab-widget-card" data-cursor="[DRAG_SLIDER]">
+                  <div class="widget-title-row">
+                    <span>02 // LIVE TOKEN INJECTOR</span>
+                    <span>VAR(--LAB-RADIUS)</span>
+                  </div>
+                  <div class="token-slider-control">
+                    <input type="range" id="lab-radius-slider" min="0" max="28" value="4" aria-label="Adjust UI Border Radius Token">
+                    <div class="token-readout-row">
+                      <span>RADIUS: <span id="lab-radius-val">4px</span></span>
+                      <span>GLOW: <span id="lab-glow-val">16px</span></span>
+                    </div>
+                  </div>
+                  <div class="face-footer">
+                    <span>LIVE DOM MUTATION</span>
+                    <span>ALL PANELS</span>
+                  </div>
+                </div>
+
+                <!-- Widget 3: Haptic Ripple Simulator -->
+                <div class="lab-widget-card" data-cursor="[CLICK_RIPPLE]">
+                  <div class="widget-title-row">
+                    <span>03 // HAPTIC SHOCKWAVE</span>
+                    <span>RADIAL DISPERSION</span>
+                  </div>
+                  <div class="ripple-pad" id="lab-ripple-pad">
+                    CLICK ANYWHERE ON PAD
+                  </div>
+                  <div class="face-footer">
+                    <span>SHOCKWAVES: <span id="ripple-count-val">0</span></span>
+                    <span>AUDIO_SYNTH</span>
+                  </div>
+                </div>
+
+                <!-- Widget 4: Multi-State Mechanical Switch -->
+                <div class="lab-widget-card" data-cursor="[TOGGLE_POS]">
+                  <div class="widget-title-row">
+                    <span>04 // AEROSPACE SELECTOR</span>
+                    <span>3-STATE LEVER</span>
+                  </div>
+                  <div class="switch-rail" id="lab-switch-rail">
+                    <div class="switch-slider-pill" id="lab-switch-pill"></div>
+                    <button type="button" class="switch-option-btn active" data-pos="0">SAFE</button>
+                    <button type="button" class="switch-option-btn" data-pos="1">ARMED</button>
+                    <button type="button" class="switch-option-btn" data-pos="2">WARP</button>
+                  </div>
+                  <div class="face-footer">
+                    <span>STATE: <span id="switch-state-val">SAFE</span></span>
+                    <span>PHYSICAL DETENT</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           03. PROJECTS SHOWCASE // 3D ARTIFACTS DECK
+           ==================================================================== -->
+      <section class="spatial-section" id="section-projects" aria-labelledby="projects-title">
+        <div class="section-container">
+          <div class="section-header-block">
+            <div class="section-kicker">03 // SPATIAL ARTIFACTS</div>
+            <h2 class="section-title" id="projects-title">SELECTED INTERACTION ARCHITECTURE</h2>
+            <p class="section-subtitle">Four deep-dive product design case studies engineered with spatial mathematics and obsessive craft.</p>
+          </div>
+
+          <div class="projects-deck-grid">
+
+            <!-- PROJECT 1: AETHER OS -->
+            <article class="project-card-3d" data-project="aether" data-cursor="[EXPAND_01]">
+              <div class="card-specular-glare" aria-hidden="true"></div>
+              <div class="card-top-meta">
+                <span class="project-id-tag">ART_01 // MIXED REALITY</span>
+                <span class="project-category-badge">SPATIAL COMPUTING</span>
+              </div>
+              <div class="card-visual-frame">
+                <!-- Pure SVG Wireframe Holographic UI -->
+                <svg class="card-visual-svg" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="20" y="20" width="360" height="160" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.4"/>
+                  <circle cx="200" cy="100" r="60" stroke="#c4ff00" stroke-width="2"/>
+                  <circle cx="200" cy="100" r="30" stroke="#ff0055" stroke-width="1.5"/>
+                  <line x1="140" y1="100" x2="260" y2="100" stroke="#c4ff00" stroke-width="1"/>
+                  <line x1="200" y1="40" x2="200" y2="160" stroke="#c4ff00" stroke-width="1"/>
+                  <path d="M 60 140 L 120 70 L 280 70 L 340 140" stroke="#00f0ff" stroke-width="2" fill="rgba(0,240,255,0.05)"/>
+                  <text x="35" y="45" fill="#c4ff00" font-family="monospace" font-size="10">FOV: 110° // 90HZ</text>
+                  <text x="260" y="165" fill="#00f0ff" font-family="monospace" font-size="10">GAZE_LOCKED</text>
+                </svg>
+              </div>
+              <div class="card-info-content">
+                <h3 class="project-card-title">AETHER OS</h3>
+                <p class="project-card-desc">
+                  Next-generation spatial operating interface for mixed reality headsets. Implemented zero-latency eye-tracking gaze targets and micro-gestural physics.
+                </p>
+                <div class="project-metrics-row">
+                  <div class="metric-item">LATENCY: <strong>4.2ms</strong></div>
+                  <div class="metric-item">ACCURACY: <strong>99.4%</strong></div>
+                  <div class="metric-item">AWARDS: <strong>Red Dot 2025</strong></div>
+                </div>
+                <div class="project-tech-tags">
+                  <span class="tech-tag">Spatial UI</span>
+                  <span class="tech-tag">Eye-Tracking Ergonomics</span>
+                  <span class="tech-tag">Pure CSS 3D</span>
+                  <span class="tech-tag">Design System</span>
+                </div>
+                <button type="button" class="card-action-btn" data-project-trigger="aether">
+                  <span>INSPECT SYSTEM BLUEPRINT</span>
+                  <span aria-hidden="true">+</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- PROJECT 2: SYNAPSE TOKENS -->
+            <article class="project-card-3d" data-project="synapse" data-cursor="[EXPAND_02]">
+              <div class="card-specular-glare" aria-hidden="true"></div>
+              <div class="card-top-meta">
+                <span class="project-id-tag">ART_02 // SYSTEM COMPILER</span>
+                <span class="project-category-badge">ENTERPRISE INFRA</span>
+              </div>
+              <div class="card-visual-frame">
+                <svg class="card-visual-svg" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="30" y="30" width="80" height="60" stroke="#c4ff00" stroke-width="1.5" fill="rgba(196,255,0,0.06)"/>
+                  <rect x="290" y="30" width="80" height="60" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.06)"/>
+                  <rect x="160" y="110" width="80" height="60" stroke="#ff0055" stroke-width="1.5" fill="rgba(255,0,85,0.06)"/>
+                  <path d="M 110 60 C 160 60 160 110 160 110" stroke="#c4ff00" stroke-width="2" stroke-dasharray="3 3"/>
+                  <path d="M 290 60 C 240 60 240 110 240 110" stroke="#00f0ff" stroke-width="2" stroke-dasharray="3 3"/>
+                  <circle cx="160" cy="85" r="4" fill="#c4ff00"/>
+                  <circle cx="240" cy="85" r="4" fill="#00f0ff"/>
+                  <text x="45" y="65" fill="#c4ff00" font-family="monospace" font-size="10">FIGMA</text>
+                  <text x="305" y="65" fill="#00f0ff" font-family="monospace" font-size="10">REACT/NATIVE</text>
+                  <text x="175" y="145" fill="#ff0055" font-family="monospace" font-size="10">SYNAPSE</text>
+                </svg>
+              </div>
+              <div class="card-info-content">
+                <h3 class="project-card-title">SYNAPSE DESIGN SYSTEM</h3>
+                <p class="project-card-desc">
+                  Multi-brand design token orchestration platform syncing design variables, elevation physics, and accessibility contrasts across 14 enterprise web & native suites.
+                </p>
+                <div class="project-metrics-row">
+                  <div class="metric-item">ADOPTION: <strong>99.8%</strong></div>
+                  <div class="metric-item">DEV VELOCITY: <strong>+340%</strong></div>
+                  <div class="metric-item">ENGINEERS: <strong>2,400+</strong></div>
+                </div>
+                <div class="project-tech-tags">
+                  <span class="tech-tag">Token Architecture</span>
+                  <span class="tech-tag">W3C Design Tokens</span>
+                  <span class="tech-tag">Automated Linter</span>
+                  <span class="tech-tag">WCAG AAA</span>
+                </div>
+                <button type="button" class="card-action-btn" data-project-trigger="synapse">
+                  <span>INSPECT SYSTEM BLUEPRINT</span>
+                  <span aria-hidden="true">+</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- PROJECT 3: VEKTOR AUDIO VST -->
+            <article class="project-card-3d" data-project="vektor" data-cursor="[EXPAND_03]">
+              <div class="card-specular-glare" aria-hidden="true"></div>
+              <div class="card-top-meta">
+                <span class="project-id-tag">ART_03 // HARDWARE & VST</span>
+                <span class="project-category-badge">AUDIO-VISUAL UI</span>
+              </div>
+              <div class="card-visual-frame">
+                <svg class="card-visual-svg" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="80" cy="100" r="45" stroke="#ffaa00" stroke-width="2"/>
+                  <line x1="80" y1="100" x2="110" y2="75" stroke="#c4ff00" stroke-width="3"/>
+                  <circle cx="80" cy="100" r="10" fill="#ffaa00"/>
+                  <!-- Oscilloscope waveform -->
+                  <path d="M 160 100 Q 185 20 210 100 T 260 100 T 310 100 T 360 100" stroke="#c4ff00" stroke-width="2.5" fill="none"/>
+                  <rect x="150" y="30" width="220" height="140" stroke="#ffaa00" stroke-width="1" stroke-dasharray="2 4"/>
+                  <text x="50" y="165" fill="#ffaa00" font-family="monospace" font-size="10">CUTOFF: 2.4KHZ</text>
+                  <text x="165" y="50" fill="#c4ff00" font-family="monospace" font-size="10">WAVESHAPER // DUAL OSC</text>
+                </svg>
+              </div>
+              <div class="card-info-content">
+                <h3 class="project-card-title">VEKTOR AUDIO VST</h3>
+                <p class="project-card-desc">
+                  Tactile synthesizer workstation interface designed for high-resolution OLED touch displays and physical motorized encoder feedback.
+                </p>
+                <div class="project-metrics-row">
+                  <div class="metric-item">REFRESH: <strong>120 FPS</strong></div>
+                  <div class="metric-item">USER BASE: <strong>180K</strong></div>
+                  <div class="metric-item">RATING: <strong>4.9 / 5.0</strong></div>
+                </div>
+                <div class="project-tech-tags">
+                  <span class="tech-tag">Tactile Skeuo-Modern</span>
+                  <span class="tech-tag">DSP Visualizer</span>
+                  <span class="tech-tag">Hardware Ergonomics</span>
+                  <span class="tech-tag">Web Audio</span>
+                </div>
+                <button type="button" class="card-action-btn" data-project-trigger="vektor">
+                  <span>INSPECT SYSTEM BLUEPRINT</span>
+                  <span aria-hidden="true">+</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- PROJECT 4: CHRONOS GRAPH -->
+            <article class="project-card-3d" data-project="chronos" data-cursor="[EXPAND_04]">
+              <div class="card-specular-glare" aria-hidden="true"></div>
+              <div class="card-top-meta">
+                <span class="project-id-tag">ART_04 // 4D CANVAS</span>
+                <span class="project-category-badge">DATA COGNITION</span>
+              </div>
+              <div class="card-visual-frame">
+                <svg class="card-visual-svg" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <!-- Isometric neural timeline lattice -->
+                  <polygon points="200,30 320,90 200,150 80,90" stroke="#00f0ff" stroke-width="1.5" fill="rgba(0,240,255,0.05)"/>
+                  <polygon points="200,60 280,100 200,140 120,100" stroke="#c4ff00" stroke-width="1" stroke-dasharray="3 3"/>
+                  <line x1="80" y1="90" x2="80" y2="130" stroke="#00f0ff" stroke-width="1.5"/>
+                  <line x1="200" y1="150" x2="200" y2="190" stroke="#00f0ff" stroke-width="1.5"/>
+                  <line x1="320" y1="90" x2="320" y2="130" stroke="#00f0ff" stroke-width="1.5"/>
+                  <circle cx="200" cy="90" r="5" fill="#ff0055"/>
+                  <circle cx="260" cy="120" r="4" fill="#c4ff00"/>
+                  <circle cx="140" cy="120" r="4" fill="#00f0ff"/>
+                  <text x="35" y="45" fill="#00f0ff" font-family="monospace" font-size="10">TIMELINE: T-0.45</text>
+                  <text x="240" y="180" fill="#c4ff00" font-family="monospace" font-size="10">NODES: 12,480</text>
+                </svg>
+              </div>
+              <div class="card-info-content">
+                <h3 class="project-card-title">CHRONOS COGNITION</h3>
+                <p class="project-card-desc">
+                  Infinite nonlinear spatial canvas for temporal intelligence analysis. Features 3D time-slice scrubbing, semantic clustering, and dynamic neural graphing.
+                </p>
+                <div class="project-metrics-row">
+                  <div class="metric-item">SCALE: <strong>100k+ Nodes</strong></div>
+                  <div class="metric-item">SEARCH: <strong>&lt; 15ms</strong></div>
+                  <div class="metric-item">SERIES A: <strong>$14M Raised</strong></div>
+                </div>
+                <div class="project-tech-tags">
+                  <span class="tech-tag">Infinite Canvas</span>
+                  <span class="tech-tag">Graph Theory</span>
+                  <span class="tech-tag">Spatial Clustering</span>
+                  <span class="tech-tag">WebGL Math</span>
+                </div>
+                <button type="button" class="card-action-btn" data-project-trigger="chronos">
+                  <span>INSPECT SYSTEM BLUEPRINT</span>
+                  <span aria-hidden="true">+</span>
+                </button>
+              </div>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           04. SKILLS & SYSTEMS // INTERACTIVE TACTILE MATRIX
+           ==================================================================== -->
+      <section class="spatial-section" id="section-skills" aria-labelledby="skills-title">
+        <div class="section-container">
+          <div class="section-header-block">
+            <div class="section-kicker">04 // CAPABILITY REGISTRY</div>
+            <h2 class="section-title" id="skills-title">THE INTERACTION MATRIX</h2>
+            <p class="section-subtitle">Periodic table of spatial architecture, system design, and technical prototyping competencies.</p>
+          </div>
+
+          <!-- Matrix Filter Bar -->
+          <div class="matrix-filter-bar" role="tablist" aria-label="Skill Categories">
+            <button type="button" class="matrix-filter-btn active" data-filter="all" data-cursor="[FILTER_ALL]">ALL DISCIPLINES [12]</button>
+            <button type="button" class="matrix-filter-btn" data-filter="spatial" data-cursor="[FILTER_SPATIAL]">SPATIAL & 3D [3]</button>
+            <button type="button" class="matrix-filter-btn" data-filter="design-systems" data-cursor="[FILTER_SYSTEMS]">DESIGN SYSTEMS [3]</button>
+            <button type="button" class="matrix-filter-btn" data-filter="code-prototyping" data-cursor="[FILTER_CODE]">CODE & PROTOTYPING [3]</button>
+            <button type="button" class="matrix-filter-btn" data-filter="ergonomics" data-cursor="[FILTER_RESEARCH]">ERGONOMICS & COGNITION [3]</button>
+          </div>
+
+          <!-- 12 Periodic Chips -->
+          <div class="skills-matrix-grid">
+
+            <div class="skill-matrix-chip" data-category="spatial" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 01</span><span>SPATIAL</span></div>
+              <div class="chip-symbol">Sp</div>
+              <div class="chip-name">Spatial UI & 3D Transforms</div>
+              <div class="chip-footer"><span>CSS 3D / PERSPECTIVE</span><span class="chip-mastery-level">EXPERT</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="spatial" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 02</span><span>SPATIAL</span></div>
+              <div class="chip-symbol">Gz</div>
+              <div class="chip-name">Gaze & Eye Tracking</div>
+              <div class="chip-footer"><span>XR / PARALLAX MATH</span><span class="chip-mastery-level">ADVANCED</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="spatial" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 03</span><span>SPATIAL</span></div>
+              <div class="chip-symbol">Ph</div>
+              <div class="chip-name">Spring & Particle Physics</div>
+              <div class="chip-footer"><span>VERLET / SPRING LERP</span><span class="chip-mastery-level">EXPERT</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="design-systems" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 04</span><span>SYSTEMS</span></div>
+              <div class="chip-symbol">Tk</div>
+              <div class="chip-name">Design Token Architectures</div>
+              <div class="chip-footer"><span>W3C / DTCG SPECS</span><span class="chip-mastery-level">EXPERT</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="design-systems" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 05</span><span>SYSTEMS</span></div>
+              <div class="chip-symbol">Mb</div>
+              <div class="chip-name">Multi-Brand Scalability</div>
+              <div class="chip-footer"><span>ENTERPRISE THEMES</span><span class="chip-mastery-level">LEAD</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="design-systems" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 06</span><span>SYSTEMS</span></div>
+              <div class="chip-symbol">A3</div>
+              <div class="chip-name">Universal Accessibility</div>
+              <div class="chip-footer"><span>WCAG 2.2 AAA / ARIA</span><span class="chip-mastery-level">AUDITOR</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="code-prototyping" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 07</span><span>CODE</span></div>
+              <div class="chip-symbol">Js</div>
+              <div class="chip-name">Vanilla ES6+ & DOM Engine</div>
+              <div class="chip-footer"><span>HIGH-PERF / ZERO-LIB</span><span class="chip-mastery-level">EXPERT</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="code-prototyping" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 08</span><span>CODE</span></div>
+              <div class="chip-symbol">Au</div>
+              <div class="chip-name">Web Audio API Synthesis</div>
+              <div class="chip-footer"><span>PROCEDURAL HAPTICS</span><span class="chip-mastery-level">ADVANCED</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="code-prototyping" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 09</span><span>CODE</span></div>
+              <div class="chip-symbol">Cv</div>
+              <div class="chip-name">Canvas 2D / SVG Animation</div>
+              <div class="chip-footer"><span>60FPS RENDER PIPELINE</span><span class="chip-mastery-level">EXPERT</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="ergonomics" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 10</span><span>RESEARCH</span></div>
+              <div class="chip-symbol">Fc</div>
+              <div class="chip-name">Fitts's Law & Motor Load</div>
+              <div class="chip-footer"><span>BIOMECHANICAL UI</span><span class="chip-mastery-level">SPECIALIST</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="ergonomics" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 11</span><span>RESEARCH</span></div>
+              <div class="chip-symbol">Mm</div>
+              <div class="chip-name">Spatial Mental Models</div>
+              <div class="chip-footer"><span>COGNITIVE FRICTION</span><span class="chip-mastery-level">PRINCIPAL</span></div>
+            </div>
+
+            <div class="skill-matrix-chip" data-category="ergonomics" data-cursor="[INSPECT_CHIP]">
+              <div class="chip-header"><span>No. 12</span><span>RESEARCH</span></div>
+              <div class="chip-symbol">Tl</div>
+              <div class="chip-name">Interaction Telemetry</div>
+              <div class="chip-footer"><span>EVENT HEATMAP ANALYTICS</span><span class="chip-mastery-level">LEAD</span></div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           05. CONTACT SECTION // TACTILE TRANSMISSION TERMINAL
+           ==================================================================== -->
+      <section class="spatial-section" id="section-contact" aria-labelledby="contact-title">
+        <div class="section-container">
+          <div class="section-header-block">
+            <div class="section-kicker">05 // SECURE TRANSMISSION</div>
+            <h2 class="section-title" id="contact-title">INITIATE QUANTUM DISPATCH</h2>
+            <p class="section-subtitle">Select your frequency band, assemble your payload, and broadcast directly to my terminal.</p>
+          </div>
+
+          <div class="terminal-dispatch-grid">
+
+            <!-- Interactive Console -->
+            <div class="terminal-console-panel">
+              <div class="terminal-title-bar">
+                <span>[TERMINAL_PORT: 8080 // SECURE_SOCKET]</span>
+                <span id="terminal-clock">UTC 12:00:00</span>
+              </div>
+
+              <!-- Frequency Band Selector -->
+              <div class="frequency-selector-group" role="radiogroup" aria-label="Frequency Selectors">
+                <button type="button" class="frequency-btn active" data-freq="VENTURE" data-cursor="[TUNE_FREQ]">
+                  FREQ 142.8 // NEW VENTURE
+                </button>
+                <button type="button" class="frequency-btn" data-freq="ADVISORY" data-cursor="[TUNE_FREQ]">
+                  FREQ 284.1 // DESIGN ADVISORY
+                </button>
+                <button type="button" class="frequency-btn" data-freq="COFFEE" data-cursor="[TUNE_FREQ]">
+                  FREQ 419.0 // CASUAL COFFEE
+                </button>
+              </div>
+
+              <!-- Terminal Input Form -->
+              <form class="terminal-form" id="transmission-form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="input-sender">TRANSMITTER_ID (YOUR NAME / STUDIO)</label>
+                  <input type="text" id="input-sender" class="terminal-input" placeholder="e.g. Elena Rostova / Kinetic Labs" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                  <label for="input-contact">RETURN_CARRIER (EMAIL / SIGNAL)</label>
+                  <input type="email" id="input-contact" class="terminal-input" placeholder="elena@kinetic.design" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                  <label for="input-payload">TRANSMISSION_PAYLOAD (PROJECT BRIEF / MESSAGE)</label>
+                  <textarea id="input-payload" class="terminal-textarea" placeholder="Describe the mission, timeline, and spatial requirements..." required></textarea>
+                </div>
+
+                <button type="submit" class="transmit-btn" id="btn-transmit-payload" data-cursor="[FIRE_TRANSMIT]">
+                  <span id="transmit-btn-text">TRANSMIT PACKET TO ORBIT</span>
+                  <span aria-hidden="true">⚡</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Live Telemetry Monitor & Direct Channels -->
+            <div class="telemetry-feed-panel">
+              <div>
+                <div class="feed-header">
+                  <span>PACKET_INSPECTOR // LIVE TELEMETRY</span>
+                  <span id="packet-status">[BUFFER_READY]</span>
+                </div>
+
+                <div class="transmission-code-screen" id="telemetry-code-screen" aria-live="polite">
+                  <div class="code-line-dim">&gt; ESTABLISHING SUBLIGHT UPLINK...</div>
+                  <div class="code-line-accent">&gt; PROTOCOL: VEX_QUANTUM_v4.2</div>
+                  <div class="code-line-dim">&gt; TARGET: alex@vexprotocol.design</div>
+                  <div class="code-line-cyan">&gt; FREQUENCY: 142.8 MHZ [NEW VENTURE]</div>
+                  <div class="code-line-dim">&gt; PAYLOAD: AWAITING INPUT BYTES...</div>
+                </div>
+              </div>
+
+              <div class="direct-channels-list">
+                <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); letter-spacing: 1px;">DIRECT_ENCRYPTED_CHANNELS:</span>
+                
+                <a href="mailto:alex@vexprotocol.design" class="channel-link" id="email-direct-link" data-cursor="[COPY_EMAIL]">
+                  <span>EMAIL: alex@vexprotocol.design</span>
+                  <span style="color: var(--acid-lime);">[DISPATCH] ↗</span>
+                </a>
+
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="channel-link" data-cursor="[EXTERNAL]">
+                  <span>GITHUB: @vexprotocol</span>
+                  <span>[SOURCE] ↗</span>
+                </a>
+
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="channel-link" data-cursor="[EXTERNAL]">
+                  <span>X / TWITTER: @alexchendesign</span>
+                  <span>[PULSE] ↗</span>
+                </a>
+
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="channel-link" data-cursor="[EXTERNAL]">
+                  <span>LINKEDIN: /in/alex-chen-spatial</span>
+                  <span>[NETWORK] ↗</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ======================================================================
+       FULL-SCREEN 3D BLUEPRINT MODAL
+       ====================================================================== -->
+  <dialog class="blueprint-modal-backdrop" id="blueprint-modal" aria-labelledby="modal-title" aria-modal="true">
+    <div class="blueprint-modal-container" id="blueprint-modal-box">
+      <div class="modal-header-bar">
+        <div class="modal-title-meta">
+          <span class="project-id-tag" id="modal-project-id">ART_01</span>
+          <h2 class="modal-project-title" id="modal-title">AETHER OS</h2>
+        </div>
+        <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Close Blueprint Modal" data-cursor="[CLOSE]">
+          ✕
+        </button>
+      </div>
+
+      <div class="modal-body-scrollable">
+        <div class="modal-tabs-nav" role="tablist">
+          <button type="button" class="modal-tab-btn active" data-tab="tab-challenge">CHALLENGE & BRIEF</button>
+          <button type="button" class="modal-tab-btn" data-tab="tab-architecture">SPATIAL ARCHITECTURE</button>
+          <button type="button" class="modal-tab-btn" data-tab="tab-metrics">IMPACT & METRICS</button>
+        </div>
+
+        <div class="modal-tab-content active" id="tab-challenge">
+          <p id="modal-challenge-text">
+            Legacy 2D graphical user interfaces rely heavily on flat physical bounding boxes. In a true mixed-reality spatial computing environment, flat floating windows induce visual fatigue and lack proprioceptive depth.
+          </p>
+          <div class="blueprint-spec-grid" id="modal-specs-grid">
+            <div class="spec-box">
+              <div class="spec-box-label">FIELD OF VIEW</div>
+              <div class="spec-box-val" id="spec-fov">110° STEREOSCOPIC</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-box-label">INTERACTION LATENCY</div>
+              <div class="spec-box-val" id="spec-latency">&lt; 4.2 MILLISECONDS</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-box-label">TARGET HARDWARE</div>
+              <div class="spec-box-val" id="spec-hardware">CUSTOM WAVEGUIDE XR</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-tab-content" id="tab-architecture">
+          <p id="modal-arch-text">
+            Engineered a hybrid gaze-assisted micro-gestural targeting protocol. By projecting a conical raycast with parabolic falloff, target selection accuracy increased by 42% over raw finger tracking.
+          </p>
+          <div class="blueprint-spec-grid">
+            <div class="spec-box">
+              <div class="spec-box-label">COGNITIVE LOAD INDEX</div>
+              <div class="spec-box-val">-38% NASA-TLX SCORE</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-box-label">GESTURAL RETENTION</div>
+              <div class="spec-box-val">94.6% FIRST-TIME USERS</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-box-label">RENDER OVERHEAD</div>
+              <div class="spec-box-val">0.45MS GPU BUDGET</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-tab-content" id="tab-metrics">
+          <p id="modal-metrics-text">
+            Deployed across 4 enterprise flight simulator prototypes and adopted as the canonical reference system for spatial design tokens by 18 partner hardware teams.
+          </p>
+          <div class="blueprint-spec-grid">
+            <div class="spec-box">
+              <div class="spec-box-label">ENTERPRISE ADOPTION</div>
+              <div class="spec-box-val">100% OF TARGET LABS</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-box-label">PATENT STATUS</div>
+              <div class="spec-box-val">GRANTED (US-119420-B2)</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-box-label">DESIGN INDUSTRY JURY</div>
+              <div class="spec-box-val">BEST IN SHOW 2025</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ======================================================================
+       KEYBOARD SHORTCUTS HELP MODAL
+       ====================================================================== -->
+  <dialog class="shortcuts-dialog" id="shortcuts-dialog" aria-labelledby="shortcuts-title" aria-modal="true">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 10px;">
+      <h3 id="shortcuts-title" style="font-family: var(--font-display); font-size: 16px; color: var(--acid-lime);">KEYBOARD COMMANDS</h3>
+      <button type="button" class="modal-close-btn" id="shortcuts-close-btn" aria-label="Close shortcuts">✕</button>
+    </div>
+    <div class="shortcuts-list">
+      <div class="shortcut-row"><span>Warp to Void (Hero)</span><kbd>1</kbd></div>
+      <div class="shortcut-row"><span>Warp to Protocol (About)</span><kbd>2</kbd></div>
+      <div class="shortcut-row"><span>Warp to Artifacts (Work)</span><kbd>3</kbd></div>
+      <div class="shortcut-row"><span>Warp to Matrix (Skills)</span><kbd>4</kbd></div>
+      <div class="shortcut-row"><span>Warp to Dispatch (Contact)</span><kbd>5</kbd></div>
+      <div class="shortcut-row"><span>Toggle Synthesizer Audio</span><kbd>M</kbd></div>
+      <div class="shortcut-row"><span>Switch Dimension (Void/Solar)</span><kbd>D</kbd></div>
+      <div class="shortcut-row"><span>Toggle Zero-Gravity Drift</span><kbd>G</kbd></div>
+      <div class="shortcut-row"><span>Reset 3D Camera Tilt</span><kbd>R</kbd></div>
+      <div class="shortcut-row"><span>Close Active Modal</span><kbd>ESC</kbd></div>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); text-align: center;">
+      CLICK & DRAG ANYWHERE ON CANVAS TO ORBIT 3D ROOM
+    </div>
+  </dialog>
+
+  <!-- Pure ES6+ Scripts -->
+  <script src="audio.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
